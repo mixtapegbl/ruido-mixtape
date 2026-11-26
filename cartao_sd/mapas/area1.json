@@ -1,0 +1,17 @@
+{
+  "area": 1,
+  "nome": "Fabrica",
+  "inicio": 0,
+  "salas": [
+    { "id": 0, "x": 2, "y": 4, "tipo": "inicio",  "nome": "Linha de montagem", "texto": "Esteira parada",   "saidas": { "n": 1 } },
+    { "id": 1, "x": 2, "y": 3, "tipo": "vazio",   "nome": "Corredor de graxa", "texto": "Cheiro de oleo",   "saidas": { "s": 0, "o": 2, "l": 3, "n": 5 } },
+    { "id": 2, "x": 1, "y": 3, "tipo": "inimigo", "nome": "Deposito",          "texto": "Rato-Fio a vista", "saidas": { "l": 1, "n": 4 } },
+    { "id": 3, "x": 3, "y": 3, "tipo": "bau",     "nome": "Almoxarifado",      "texto": "Um bau velho",     "saidas": { "o": 1 } },
+    { "id": 4, "x": 1, "y": 2, "tipo": "altar",   "nome": "Capela do turno",   "texto": "Altar de sucata",  "saidas": { "s": 2, "n": 6 } },
+    { "id": 5, "x": 2, "y": 2, "tipo": "porta",   "nome": "Portao de carga",   "texto": "Portao aberto",    "saidas": { "s": 1, "n": 7 }, "tranca": true },
+    { "id": 6, "x": 1, "y": 1, "tipo": "chave",   "nome": "Vestiario",         "texto": "Armario aberto",   "saidas": { "s": 4 } },
+    { "id": 7, "x": 2, "y": 1, "tipo": "vazio",   "nome": "Esteira norte",     "texto": "Vozes ao norte..", "saidas": { "s": 5, "n": 8, "l": 9 } },
+    { "id": 8, "x": 2, "y": 0, "tipo": "chefe",   "nome": "Sala da Esteira",   "texto": "ESTEIRA-MAE!",     "saidas": { "s": 7 } },
+    { "id": 9, "x": 3, "y": 1, "tipo": "inimigo", "nome": "Prensas",           "texto": "Prensa Viva!",     "saidas": { "o": 7 } }
+  ]
+}

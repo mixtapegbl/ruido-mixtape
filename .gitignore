@@ -1,0 +1,18 @@
+# Senhas e chaves (Wi-Fi etc.) — nunca vão para o GitHub
+secrets.h
+**/secrets.h
+
+# Músicas de teste com direitos autorais (ex.: trilha do Undertale)
+cartao_sd/som/*.wav
+cartao_sd/som/*.mp3
+
+# Arquivos gerados pela compilação / editores
+build/
+**/build/
+*.elf
+*.map
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+desktop.ini
