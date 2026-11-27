@@ -264,7 +264,7 @@ Cada classe começa com 1 habilidade e ganha mais 1 por chefe (chefes 1 a 4). As
 ---
 
 ## 7.5 Um console só: o papel de cada placa
-As duas placas funcionam como **um console só**. A **Placa V é o cérebro** e a **Placa E é o controle com a caixa de diálogo**. O estado do jogo existe só na V: a E nunca decide nada sozinha, ela mostra o que a V manda e avisa o que o jogador fez. Assim as duas nunca ficam "discordando".
+As placas funcionam como **um console só** (desde o Raio-X, com uma terceira: a **CAIXA**, ESP32 DevKit V1, que cuida do som 8 bits e do Wi-Fi e fala com o AMP por fio; veja a seção 13). A **Placa V é o cérebro** e a **Placa E é o controle com a caixa de diálogo**. O estado do jogo existe só na V: a E nunca decide nada sozinha, ela mostra o que a V manda e avisa o que o jogador fez. Assim as duas nunca ficam "discordando".
 
 **Placa V (Receptor): o console**
 - Roda o jogo inteiro: mapa, salas, névoa, batalha, inimigos, XP, inventário e Corrupção.
@@ -558,13 +558,10 @@ MICRO SD
   MISO -> GPIO 13   (só o SD usa)
   CS   -> GPIO 14
 
-DAC UDA1334A
-  VIN  -> 5V
-  GND  -> GND
-  BCLK -> GPIO 15
-  WSEL -> GPIO 16
-  DIN  -> GPIO 17
-  Lout / Rout / AGND -> entrada do amplificador TPA3116D2
+UART com a CAIXA (o DAC e o som foram para a CAIXA)
+  TX   -> GPIO 39   (vai no RX2 = GPIO 16 da CAIXA)
+  RX   -> GPIO 40   (vem do TX2 = GPIO 17 da CAIXA)
+  GND  -> GND da CAIXA (o ÚNICO fio de GND entre o lado da lógica e o lado do áudio)
 
 RTC DS1302
   VCC  -> 3V3
@@ -576,7 +573,7 @@ RTC DS1302
 LED ONBOARD (status da conexão)
   -> GPIO 48
 
-LIVRES: 1, 2, 39, 40, 41, 42, 47
+LIVRES: 1, 2, 15, 16, 17, 41, 42, 47
 ```
 
 ### Placa E (controle)
@@ -632,7 +629,34 @@ LED ONBOARD (status da conexão)
 LIVRES: 15, 16, 17, 18, 38, 39, 40, 41, 42
 ```
 
-**Nunca usar nas duas placas:** 0, 3, 45, 46 (boot) · 19, 20 (USB) · 26–32 (memória flash) · **33–37 (PSRAM da N16R8)** · 43, 44 (Serial).
+### CAIXA (ESP32 DevKit V1 clássica): áudio e rede
+```
+UART com o AMP (Serial2)
+  RX2  -> GPIO 16   (vem do TX = GPIO 39 do AMP)
+  TX2  -> GPIO 17   (vai no RX = GPIO 40 do AMP)
+  GND  -> GND do AMP
+
+SOM 8 BITS (DAC interno, teste 6)
+  GPIO 25 (DAC1) -> resistor 1 kΩ -> capacitor 10 µF (+ do lado do ESP) -> entrada L do amplificador
+  GPIO 26 (DAC2) -> reservado (segundo canal)
+
+DAC UDA1334A (opcional, para som de qualidade depois)
+  BCLK -> GPIO 27 · WSEL -> GPIO 14 · DIN -> GPIO 13 · VIN -> 3V3 da CAIXA · GND
+
+LED RGB (cátodo comum: GND + 3 cores, 220 Ω em cada cor)
+  R -> GPIO 32 · G -> GPIO 33 · B -> GPIO 4 · comum -> GND
+
+LED DA PLACA -> GPIO 2 (azul)
+ALIMENTAÇÃO  -> VIN <- 5V das células (cabo vermelho do pacote)
+
+LIVRES: 5, 18, 19, 21, 22, 23 · só entrada: 34, 35, 36, 39
+NUNCA USAR: 6 a 11 (flash) · 1 e 3 (USB/Serial) · cuidado no boot: 0, 2, 12, 15
+```
+- **Sem cartão SD** (só existe um, e ele fica no AMP): a música da CAIXA é **gerada por código**, nota por nota, num sintetizador de 3 vozes (pulso, triângulo e ruído). Cabe na memória e tem a cara de console antigo.
+- **Wi-Fi na CAIXA:** portal que pede nome e senha da rede, hora pela internet e site de status. Como ela fala com o AMP por fio, pode ficar no canal do roteador (10) sem mexer no ESP-NOW (canal 1).
+- **"Ruído" no som:** a CAIXA reduz bits, segura amostras e coloca chiado conforme a Corrupção sobe.
+
+**Nunca usar nas duas placas S3:** 0, 3, 45, 46 (boot) · 19, 20 (USB) · 26–32 (memória flash) · **33–37 (PSRAM da N16R8)** · 43, 44 (Serial).
 
 **Cuidado com o LCD:** o módulo I2C dele fica ligado em 5V e tem resistores de pull-up para os 5V, então o SDA e o SCL chegam no ESP com 5V. Na prática costuma funcionar, mas o ESP32 é de 3,3V. O jeito seguro é tirar os 2 resistores de pull-up do módulo do LCD (os do OLED, em 3,3V, já bastam) ou usar um conversor de nível lógico.
 

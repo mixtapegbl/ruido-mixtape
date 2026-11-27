@@ -38,7 +38,7 @@
 #define LED_PLACA  48
 #define SPI_FREQ_TELAS 27000000
 
-#include "../comum/mensagem.h"   // Mensagem, MACs e canal do rádio
+#include "../../comum/mensagem.h"   // Mensagem, MACs e canal do rádio
 
 // --- MAPA EMBUTIDO (igual ao /mapas/area1.json) -----------------------------
 const char MAPA_PADRAO[] PROGMEM = R"json(

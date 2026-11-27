@@ -2,7 +2,7 @@
 // RUÍDO — uma MIXTAPE de terror
 // comum/mensagem.h · o "idioma" do rádio entre o AMP (Placa V) e o PEDAL (Placa E)
 //
-// As duas placas incluem ESTE arquivo:  #include "../comum/mensagem.h"
+// AMP e PEDAL incluem ESTE arquivo:  #include "../../comum/mensagem.h"
 // Mudou algo aqui? Grave de novo nas DUAS placas, senão elas param de se entender
 // (o receptor descarta mensagens com tamanho diferente).
 // ============================================================================

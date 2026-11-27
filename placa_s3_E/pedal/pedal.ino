@@ -40,7 +40,7 @@
 #define LED_B      47
 #define LED_PLACA  48
 
-#include "../comum/mensagem.h"   // Mensagem, MACs e canal do rádio
+#include "../../comum/mensagem.h"   // Mensagem, MACs e canal do rádio
 
 const char* NOMES[] = { "MENU", "CIMA", "BAIXO", "OK", "VOLTAR", "ENC OK", "ENC GIRO" };
 
