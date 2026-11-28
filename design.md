@@ -523,11 +523,12 @@ Para cada faixa, pedir **"loop instrumental de 60 segundos, sem voz, que emende 
 |---|---|---|
 | **Placa V** (console) | `A4:CB:8F:D4:AB:34` | `uint8_t macPlacaV[] = {0xA4, 0xCB, 0x8F, 0xD4, 0xAB, 0x34};` |
 | **Placa E** (controle) | `A4:CB:8F:D3:4F:00` | `uint8_t macPlacaE[] = {0xA4, 0xCB, 0x8F, 0xD3, 0x4F, 0x00};` |
-| **CAIXA** (DevKit V1) | `E8:6B:EA:DD:09:A0` | `uint8_t macCaixa[] = {0xE8, 0x6B, 0xEA, 0xDD, 0x09, 0xA0};` (fala por UART; o MAC só importa se um dia usar ESP-NOW) |
+| **CAIXA** (DevKit V1, nova) | `8C:94:DF:46:7A:90` | `uint8_t macCaixa[] = {0x8C, 0x94, 0xDF, 0x46, 0x7A, 0x90};` (fala por UART; o MAC só importa se um dia usar ESP-NOW) |
+| DevKit V1 antiga (fora da CAIXA) | `E8:6B:EA:DD:09:A0` | `{0xE8, 0x6B, 0xEA, 0xDD, 0x09, 0xA0}` · mesmo chip e mesmos resultados do `teste_geral` |
 
 Canal do ESP-NOW: **1**, por enquanto.
 - O roteador troca de canal sozinho (no Raio-X da S3 estava no 10; no `teste_geral` da CAIXA, no 1). Por isso **o canal do roteador nunca entra fixo no código**: só a CAIXA usa o Wi-Fi, e ela segue o roteador sozinha.
-- Como a CAIXA fala com o AMP por fio, o ESP-NOW do PEDAL e do AMP pode ficar num canal escolhido por nós. O canal 1 está cheio na casa (4 redes no `teste_geral`); se o rodapé do teste 3 mostrar mensagens perdidas, trocar para um canal vazio (ex.: 13, ou 4, 8, 9).
+- Como a CAIXA fala com o AMP por fio, o ESP-NOW do PEDAL e do AMP pode ficar num canal escolhido por nós. O canal 1 está cheio na casa (4 redes no `teste_geral`); se o rodapé do teste 3 mostrar mensagens perdidas, trocar para um canal vazio (ex.: 4, 8 ou 9). **Evitar o 13**: é o canal do hotspot POCO_X7_Pro (visto no `teste_geral` da CAIXA nova, a -32 dBm).
 
 **Regras usadas:** o SPI da Placa V usa os pinos nativos do ESP32-S3 (11, 12 e 13), os mais rápidos; o I2C da Placa E usa os pinos padrão (8 e 9); todo botão usa `INPUT_PULLUP`, com a outra perna no GND.
 
@@ -653,9 +654,9 @@ ALIMENTAÇÃO  -> VIN <- 5V das células (cabo vermelho do pacote)
 LIVRES: 5, 18, 19, 21, 22, 23, 25, 26 · só entrada: 34, 35, 36, 39
 NUNCA USAR: 6 a 11 (flash) · 1 e 3 (USB/Serial) · cuidado no boot: 0, 2, 12, 15
 ```
-- **`teste_geral` (28/11):** ESP32-D0WD-V3 rev 3.1, 2 núcleos a 240 MHz, **4 MB de flash, sem PSRAM**, 280 KB de RAM livre (maior bloco 107 KB), passou no teste de energia, float 11,5x mais rápido que double. App de até 1,28 MB na partição padrão: se a CAIXA (Wi-Fi + site + som) passar disso, escolher **"No OTA (2MB APP/2MB SPIFFS)"** em Partition Scheme.
+- **`teste_geral` (28/11), CAIXA nova (`8C:94:DF:46:7A:90`) e DevKit antiga deram o mesmo resultado:** ESP32-D0WD-V3 rev 3.1, 2 núcleos a 240 MHz, **4 MB de flash, sem PSRAM**, 280 KB de RAM livre (maior bloco 107 KB), passou no teste de energia, float 11,5x mais rápido que double. App de até 1,28 MB na partição padrão: se a CAIXA (Wi-Fi + site + som) passar disso, escolher **"No OTA (2MB APP/2MB SPIFFS)"** em Partition Scheme.
 - **Sem cartão SD** (só existe um, e ele fica no AMP): a música da CAIXA é **gerada por código**, nota por nota, num sintetizador de 3 vozes (pulso, triângulo e ruído). Cabe na memória e tem a cara de console antigo.
-- **Wi-Fi na CAIXA:** portal que pede nome e senha da rede, hora pela internet e site de status. Como ela fala com o AMP por fio, pode ficar no canal do roteador (10) sem mexer no ESP-NOW (canal 1).
+- **Wi-Fi na CAIXA:** portal que pede nome e senha da rede, hora pela internet e site de status. Como ela fala com o AMP por fio, pode seguir o canal do roteador (que muda sozinho) sem mexer no ESP-NOW (canal 1).
 - **"Ruído" no som:** a CAIXA reduz bits, segura amostras e coloca chiado conforme a Corrupção sobe.
 
 **Nunca usar nas duas placas S3:** 0, 3, 45, 46 (boot) · 19, 20 (USB) · 26–32 (memória flash) · **33–37 (PSRAM da N16R8)** · 43, 44 (Serial).
