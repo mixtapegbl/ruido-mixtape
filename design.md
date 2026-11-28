@@ -524,6 +524,7 @@ Para cada faixa, pedir **"loop instrumental de 60 segundos, sem voz, que emende 
 | **Placa V** (console) | `A4:CB:8F:D4:AB:34` | `uint8_t macPlacaV[] = {0xA4, 0xCB, 0x8F, 0xD4, 0xAB, 0x34};` |
 | **Placa E** (controle) | `A4:CB:8F:D3:4F:00` | `uint8_t macPlacaE[] = {0xA4, 0xCB, 0x8F, 0xD3, 0x4F, 0x00};` |
 | **CAIXA** (DevKit V1, nova) | `8C:94:DF:46:7A:90` | `uint8_t macCaixa[] = {0x8C, 0x94, 0xDF, 0x46, 0x7A, 0x90};` (fala por UART; o MAC só importa se um dia usar ESP-NOW) |
+| **DevKit V1 nº 2** (papel a definir) | `8C:94:DF:8F:9D:E4` | `uint8_t macDevkit2[] = {0x8C, 0x94, 0xDF, 0x8F, 0x9D, 0xE4};` · `teste_geral` igual ao da CAIXA |
 | ~~DevKit V1 antiga~~ | `E8:6B:EA:DD:09:A0` | **queimou** (regulador e módulo esquentando com tensão alta) e foi descartada |
 
 Canal do ESP-NOW: **1**, por enquanto.
@@ -658,7 +659,7 @@ ALIMENTAÇÃO  -> VIN <- 5V das células (cabo vermelho do pacote)
 LIVRES: 5, 18, 19, 21, 22, 23, 25, 26 · só entrada: 34, 35, 36, 39
 NUNCA USAR: 6 a 11 (flash) · 1 e 3 (USB/Serial) · cuidado no boot: 0, 2, 12, 15
 ```
-- **`teste_geral` (28/11), CAIXA nova (`8C:94:DF:46:7A:90`):** ESP32-D0WD-V3 rev 3.1, 2 núcleos a 240 MHz, **4 MB de flash, sem PSRAM**, 280 KB de RAM livre (maior bloco 107 KB), passou no teste de energia, float 11,5x mais rápido que double. App de até 1,28 MB na partição padrão: se a CAIXA (Wi-Fi + site + som) passar disso, escolher **"No OTA (2MB APP/2MB SPIFFS)"** em Partition Scheme.
+- **`teste_geral` (28/11), CAIXA (`8C:94:DF:46:7A:90`) e DevKit nº 2 (`8C:94:DF:8F:9D:E4`), resultados iguais:** módulo ESP32-WROOM-32, ESP32-D0WD-V3 rev 3.1, 2 núcleos a 240 MHz, **4 MB de flash, sem PSRAM**, 280 KB de RAM livre (maior bloco 107 KB), passou no teste de energia, float 11,5x mais rápido que double. App de até 1,28 MB na partição padrão: se a CAIXA (Wi-Fi + site + som) passar disso, escolher **"No OTA (2MB APP/2MB SPIFFS)"** em Partition Scheme.
 - **Sem cartão SD** (só existe um, e ele fica no AMP): a música da CAIXA é **gerada por código**, nota por nota, num sintetizador de 3 vozes (pulso, triângulo e ruído). Cabe na memória e tem a cara de console antigo.
 - **Wi-Fi na CAIXA:** portal que pede nome e senha da rede, hora pela internet e site de status. Como ela fala com o AMP por fio, pode seguir o canal do roteador (que muda sozinho) sem mexer no ESP-NOW (canal 1).
 - **"Ruído" no som:** a CAIXA reduz bits, segura amostras e coloca chiado conforme a Corrupção sobe.
