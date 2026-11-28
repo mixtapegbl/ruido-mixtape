@@ -4,7 +4,7 @@ Placa do **áudio e da rede** do RUÍDO. O código do projeto (`caixa.ino`) come
 depois que o teste `teste/t6_audio_8bit` funcionar na bancada.
 
 O que ela vai fazer:
-- **Som 8 bits gerado por código** (sintetizador estilo Game Boy) no DAC interno, GPIO 25.
+- **Som 8 bits gerado por código** (sintetizador estilo Game Boy) saindo pelo DAC I2S UDA1334A (BCLK 27, WSEL 14, DIN 13).
   Não precisa de cartão SD: as músicas são notas, ocupam poucos bytes.
 - **Efeitos por cima da música** e o **"Ruído" da Corrupção** aplicado ao som em tempo real.
 - **Wi-Fi**: portal que pede nome e senha da rede, hora pela internet e site com os status.

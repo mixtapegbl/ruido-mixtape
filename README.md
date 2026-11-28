@@ -53,6 +53,6 @@ Matriz de pinos e MACs: `design.md`, seção 13.
 | `t3_placa_e` + `t3_placa_v_link` | PEDAL + AMP | Rádio nos dois sentidos, botões, encoder, OLED, DHT11 |
 | `t4_mapa_v` | AMP | Mapa de salas com névoa |
 | `t5_calibrar_telas` | AMP | Ajuste de offset e cores das telas |
-| `t6_audio_8bit` | CAIXA | Sintetizador 8 bits no DAC interno: músicas, efeitos e o "Ruído" |
+| `t6_audio_8bit` | CAIXA | Sintetizador 8 bits pelo UDA1334A (I2S): músicas, efeitos e o "Ruído" |
 
 Os testes são independentes (cada um tem a sua cópia da Mensagem). O projeto usa `comum/mensagem.h`.

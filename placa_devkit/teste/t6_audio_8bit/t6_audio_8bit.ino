@@ -1,15 +1,20 @@
 // ============================================================================
 // RUÍDO — uma MIXTAPE de terror
-// TESTE 6 · ÁUDIO 8 BITS NO DAC INTERNO (CAIXA · ESP32 DevKit V1 clássica)
+// TESTE 6 · ÁUDIO 8 BITS PELO UDA1334A (CAIXA · ESP32 DevKit V1 clássica)
 //
 // Um sintetizador estilo Game Boy / NES feito só com código: 3 vozes
-// (pulso, triângulo e ruído), músicas curtas e efeitos. Não precisa de SD
-// nem do UDA1334A: o som sai direto do DAC interno de 8 bits.
+// (pulso, triângulo e ruído), músicas curtas e efeitos. Não precisa de SD.
+// O som é calculado em 8 bits (a "cara" de console antigo) e sai pelo
+// módulo DAC UDA1334A por I2S, que entrega um sinal limpo para o amplificador.
 //
-// LIGAÇÃO (volume do amplificador no MÍNIMO antes de ligar):
-//   GPIO 25 (DAC1) ── resistor 1 kΩ ── capacitor 10 µF (+ do lado do ESP) ── entrada L do amplificador
-//   GND do ESP ───────────────────────────────────────────────────────────── GND da entrada do amplificador
-//   (o capacitor tira os 1,65 V de "meio" que o DAC sempre tem na saída)
+// LIGAÇÃO DO UDA1334A (volume do amplificador no MÍNIMO antes de ligar):
+//   BCLK  <- GPIO 27
+//   WSEL  <- GPIO 14
+//   DIN   <- GPIO 13
+//   VIN   <- 3V3 da DevKit (aceita 3,3 a 5 V, NUNCA 12 V)
+//   GND   <- GND da DevKit
+//   Lout / Rout / AGND -> entrada do amplificador (ou o P2 do próprio módulo num fone)
+//   Os outros pinos (SCLK, PLL, MUTE, DEEM, SF0, SF1) ficam desligados.
 //
 // Arduino IDE: placa "ESP32 Dev Module" · Monitor Serial 115200
 //
@@ -23,13 +28,17 @@
 // ============================================================================
 
 #include <Arduino.h>
-#include "driver/dac_continuous.h"
+#include <ESP_I2S.h>
 
-#define TAXA        22050      // amostras por segundo (o mínimo do DAC com o relógio padrão é 19,6 kHz)
+#define I2S_BCLK    27
+#define I2S_WSEL    14
+#define I2S_DIN     13
+
+#define TAXA        22050      // amostras por segundo (baixo de propósito: som de console antigo)
 #define BLOCO       256        // amostras geradas por vez
 #define FRAME_HZ    60         // o "relógio" das músicas, como nos consoles antigos
 
-dac_continuous_handle_t dac = nullptr;
+I2SClass i2s;
 
 // --------------------------------------------------------------- VOZES
 enum Onda : uint8_t { PULSO_12, PULSO_25, PULSO_50, TRIANGULO, RUIDO };
@@ -188,7 +197,7 @@ void avancarEfeito() {
 
 // --------------------------------------------------------------- TAREFA DE ÁUDIO
 void tarefaAudio(void*) {
-  static uint8_t buf[BLOCO];
+  static int16_t buf[BLOCO * 2];                    // estéreo: esquerdo, direito, esquerdo...
   const int amostrasPorFrame = TAXA / FRAME_HZ;
   int contadorFrame = 0;
   uint8_t ultimaAmostra = 128;
@@ -231,10 +240,11 @@ void tarefaAudio(void*) {
         else seguraAmostra = 0;
       }
       ultimaAmostra = amostra;
-      buf[i] = amostra;
+      int16_t saida = (int16_t)((amostra - 128) << 8);  // 8 bits -> 16 bits (o UDA1334A recebe 16)
+      buf[i * 2]     = saida;                         // esquerdo
+      buf[i * 2 + 1] = saida;                         // direito (mesmo som nos dois)
     }
-    size_t enviados = 0;
-    dac_continuous_write(dac, buf, BLOCO, &enviados, -1);   // espera o DMA ter espaço
+    i2s.write((uint8_t*)buf, sizeof(buf));            // espera o DMA ter espaço
   }
 }
 
@@ -256,18 +266,10 @@ void setup() {
   Serial.println("========== TESTE 6 · AUDIO 8 BITS · CAIXA ==========");
   Serial.println("Volume do amplificador no MINIMO!");
 
-  dac_continuous_config_t cfg = {};
-  cfg.chan_mask = DAC_CHANNEL_MASK_CH0;               // GPIO 25
-  cfg.desc_num  = 6;
-  cfg.buf_size  = 1024;
-  cfg.freq_hz   = TAXA;
-  cfg.offset    = 0;
-  cfg.clk_src   = DAC_DIGI_CLK_SRC_DEFAULT;
-  cfg.chan_mode = DAC_CHANNEL_MODE_SIMUL;
-  esp_err_t e1 = dac_continuous_new_channels(&cfg, &dac);
-  esp_err_t e2 = (e1 == ESP_OK) ? dac_continuous_enable(dac) : e1;
-  Serial.printf("DAC (GPIO 25) a %d Hz: %s\n", TAXA, e2 == ESP_OK ? "OK" : esp_err_to_name(e2));
-  if (e2 != ESP_OK) { Serial.println("Sem DAC: confira se a placa e uma ESP32 classica (DevKit V1)."); return; }
+  i2s.setPins(I2S_BCLK, I2S_WSEL, I2S_DIN);
+  bool ok = i2s.begin(I2S_MODE_STD, TAXA, I2S_DATA_BIT_WIDTH_16BIT, I2S_SLOT_MODE_STEREO);
+  Serial.printf("UDA1334A (BCLK %d, WSEL %d, DIN %d) a %d Hz: %s\n", I2S_BCLK, I2S_WSEL, I2S_DIN, TAXA, ok ? "OK" : "FALHOU");
+  if (!ok) { Serial.println("Sem I2S: confira a placa (ESP32 Dev Module) e os pinos."); return; }
 
   vozes[0].onda = PULSO_25; vozes[1].onda = TRIANGULO; vozes[2].onda = RUIDO; efeito.onda = PULSO_25;
   xTaskCreatePinnedToCore(tarefaAudio, "audio", 4096, nullptr, 5, nullptr, 1);
